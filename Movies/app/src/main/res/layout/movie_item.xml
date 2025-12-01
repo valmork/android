@@ -12,6 +12,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:minHeight="250dp"
             android:id="@+id/imageViewPoster"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

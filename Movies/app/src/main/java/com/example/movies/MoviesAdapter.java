@@ -3,6 +3,7 @@ package com.example.movies;
 // адаптер нужен для RecyclerView чтобы отображать элементы на экране
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +23,22 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     // внутрь адаптера нужно передавать коллекцию фильмов
     private List<Movie> movies = new ArrayList<>();
+    private OnReachEndListener onReachEndListener;
+    private OnMovieClickListener onMovieClickListener;
+
+    // из активити мы можем вызывать данный сеттер, переопределять
+    // слушатель и определять поведение при достижении конца списка
+    public void setOnReachEndListener(OnReachEndListener onReachEndListener) {
+        this.onReachEndListener = onReachEndListener;
+    }
 
     public void setMovies(List<Movie> movies) {
         this.movies = movies;
         notifyDataSetChanged();
+    }
+
+    public void setOnMovieClickListener(OnMovieClickListener onMovieClickListener) {
+        this.onMovieClickListener = onMovieClickListener;
     }
 
     @NonNull
@@ -43,6 +56,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
+        Log.d("MoviesAdapter", "onBindViewHolder: " + position);
         Movie movie = movies.get(position);
         // необходимо установить картинку в ImageView, делаем это при помощи Glide
         if(movie.getPoster()!=null) {
@@ -68,11 +82,33 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         holder.textViewRating.setBackground(background);
         holder.textViewRating.setText(String.valueOf(rating).substring(0,3));
 
+        if (position > movies.size() - 10 && onReachEndListener != null){
+            onReachEndListener.OnReachEnd();
+        }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (onMovieClickListener != null){
+                    onMovieClickListener.onMovieClick(movie);
+                }
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
         return movies.size();
+    }
+
+    interface OnReachEndListener{
+
+        void OnReachEnd();
+    }
+
+    interface OnMovieClickListener{
+
+        void onMovieClick(Movie movie);
     }
 
     static class MovieViewHolder extends RecyclerView.ViewHolder{
